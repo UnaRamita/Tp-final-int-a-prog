@@ -13,13 +13,17 @@ const int bordeInf = 63;
 //la idea de este bool es que cuando un enemigo toque el borde cambien todos de direccion
 bool borde=false;
 bool cMborde=false;
+//a ver si esto soluciona el problema del movimiento en bloque
+int moveX;
+int moveY;
+
 //clases principal y subclase de enemigos
 class Enemigo{
 protected:
 	int hp = 1; //vida
 	int velocidad;
-	int moveX;// movimiento en eje x
-	int moveY;// movimiento en eje y
+	//int moveX;// movimiento en eje x
+	//int moveY;// movimiento en eje y
 	int color;
 	int x;
 	int y;
@@ -172,7 +176,7 @@ void Enemigo::behavior(){
 
 int main (int argc, char *argv[]) {
 	EnemigoM *em1= new EnemigoM(2,4);
-	EnemigoM *em2= new EnemigoM(2,6);
+	EnemigoH *em2= new EnemigoH(2,6);
 	while(true){
 		em1 ->behavior();
 		em2 ->behavior();
