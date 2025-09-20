@@ -13,11 +13,14 @@ const int bordeInf = 30;
 //la idea de este bool es que cuando un enemigo toque el borde cambien todos de direccion
 bool cMborde=false;
 //a ver si esto soluciona el problema del movimiento en bloque}
-// se movieron el bloque pero no cambiaron de dirrecion, todavia no entiendo el por que
+// se movieron el bloque pero no cambiaron de dirrecion no entiendo por que
 int moveX=1;
 int moveY=0;
 
+
+
 //clases principal y subclase de enemigos
+
 class Enemigo{
 protected:
 	int hp = 1; //vida
@@ -126,6 +129,7 @@ gotoxy(x,y);
 textcolor(color);
 cout<< forma;
 }
+
 void Enemigo::move(){
 	
 	if (moveX==1 && moveY ==0){
@@ -139,21 +143,16 @@ void Enemigo::move(){
 	else if(moveY==1 && cMborde==false){
 		y++;
 		moveY=0;
-		cMborde=true;
 	}
 }
-void Enemigo::behavior(){
+void Enemigo::behavior(){ // cambiar nombre ?
 	if(rit+countR<clock()){
-		
-		borrar();
-		move();
-		dibujar();
-		
 		
 		//baja uno
 		if ( bordeDer == x || bordeIzq== x){
-			if(cMborde==true){
-			moveY=1;
+			if(cMborde==false){
+				moveY=1;
+				
 			}
 		}
 		else{moveY=0;}
@@ -165,14 +164,16 @@ void Enemigo::behavior(){
 			moveX= 1;
 		}
 		
+		
+		borrar();
+		move();
+		dibujar();
+		
 		countR = clock();//importante xd
 	}
 }
 
 int main (int argc, char *argv[]) {
-	
-	EnemigoM *em1= new EnemigoM(2,4);
-	EnemigoH *em2= new EnemigoH(2,6);
 	
 	for(int x = bordeIzq; x <= bordeDer; x++){
 		gotoxy(x,bordeSup);
@@ -182,15 +183,18 @@ int main (int argc, char *argv[]) {
 		gotoxy(x,bordeInf);
 		cout <<"-";
 	}
-
-	for(int y = bordeSup; y <= bordeSup; y++){
-		gotoxy (bordeIzq,y);
+	for(int y = bordeSup; y <= bordeInf; y++){
+		gotoxy (bordeIzq-1,y);
 		cout<<"|";
 	}
 	for(int y = bordeSup; y <= bordeInf; y++){
-		gotoxy (bordeDer,y);
+		gotoxy (bordeDer+1,y);
 		cout<<"|";
 	}
+	
+	EnemigoM *em1= new EnemigoM(4,4);
+	EnemigoH *em2= new EnemigoH(4,6);
+	
 	while(true){
 		em1 ->behavior();
 		em2 ->behavior();
