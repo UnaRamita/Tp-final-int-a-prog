@@ -7,15 +7,15 @@
 using namespace std;
 //bordes
 const int bordeSup = 3;
-const int bordeIzq = 1;
+const int bordeIzq = 3;
 const int bordeDer = 43;
-const int bordeInf = 63;
+const int bordeInf = 30;
 //la idea de este bool es que cuando un enemigo toque el borde cambien todos de direccion
-bool borde=false;
 bool cMborde=false;
-//a ver si esto soluciona el problema del movimiento en bloque
-int moveX;
-int moveY;
+//a ver si esto soluciona el problema del movimiento en bloque}
+// se movieron el bloque pero no cambiaron de dirrecion, todavia no entiendo el por que
+int moveX=1;
+int moveY=0;
 
 //clases principal y subclase de enemigos
 class Enemigo{
@@ -92,8 +92,6 @@ public:
 //
 Enemigo::Enemigo(int cX,int cY, int vel){
 	velocidad= vel; //velocidad de prueba, despues probar
-	moveX=1;
-	moveY=0;
 	x = cX;
 	y = cY;
 	
@@ -152,21 +150,18 @@ void Enemigo::behavior(){
 		dibujar();
 		
 		
-		//borde
-		if (x==bordeIzq+1 || x==bordeDer-1){
-			borde=true;
-		}
-		else {borde=false;}
 		//baja uno
-		if (borde==true && cMborde==false){
+		if ( bordeDer == x || bordeIzq== x){
+			if(cMborde==true){
 			moveY=1;
+			}
 		}
 		else{moveY=0;}
 		//cambio de direccion dsp de hacer lo anterior
-		if (moveX ==1 && borde==true && cMborde==true){
+		if (moveX ==1 && cMborde==true){
 			moveX= -1;
 		}
-		else if (moveX ==-1 && borde==true && cMborde==true){
+		else if (moveX ==-1 && cMborde==true){
 			moveX= 1;
 		}
 		
@@ -175,8 +170,27 @@ void Enemigo::behavior(){
 }
 
 int main (int argc, char *argv[]) {
+	
 	EnemigoM *em1= new EnemigoM(2,4);
 	EnemigoH *em2= new EnemigoH(2,6);
+	
+	for(int x = bordeIzq; x <= bordeDer; x++){
+		gotoxy(x,bordeSup);
+		cout <<"-";
+	}
+	for(int x = bordeIzq; x <= bordeDer; x++){
+		gotoxy(x,bordeInf);
+		cout <<"-";
+	}
+
+	for(int y = bordeSup; y <= bordeSup; y++){
+		gotoxy (bordeIzq,y);
+		cout<<"|";
+	}
+	for(int y = bordeSup; y <= bordeInf; y++){
+		gotoxy (bordeDer,y);
+		cout<<"|";
+	}
 	while(true){
 		em1 ->behavior();
 		em2 ->behavior();
