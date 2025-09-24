@@ -23,12 +23,10 @@ clock_t shCountR;
 char ad;
 char shKey;
 
-bool shJ = false;
 //clases principal y subclase de enemigos
 
 class Enemigo{
     protected:
-	int hp = 1; //vida
 	int velocidad;
 	//int moveX;// movimiento en eje x
 	//int moveY;// movimiento en eje y
@@ -41,6 +39,7 @@ class Enemigo{
 	clock_t countR
 	dsp revisar que no me quede nada de codigo de esto colgado por ahi esto incluye la velocidad que tenian puesta los enemigos
 	*/
+	
 	//los voids los aclaro mas adelante
 	void borrar();
 	void dibujar();
@@ -50,8 +49,13 @@ public:
 	
 	Enemigo(int cX,int cY); // posicion del Enemigo// ese vel dsp sacarlo, es para probar velocidades dsp lo dejo ya puesto en el construct
 	void move(int mX, int mY);
+	void dead ();
+	
+	bool act = true;
+	
+	int points;
 	int getX(){return x;}
-	int getY(){return y;}// por el momento lo agrego de onda, no se si lo voy a usar
+	int getY(){return y;}
 };
 // Enemigos forma color y puntos(puntos no se si lo voy a dejar vere cuando haga el sistema de puntos)
 class EnemigoH : public Enemigo{
@@ -103,17 +107,26 @@ void Enemigo::borrar(){
 	cout << ' ';
 }
 void Enemigo::dibujar(){
-	gotoxy(x,y);
-	textcolor(color);
-	cout<< forma;
+		gotoxy(x,y);
+		textcolor(color);
+		cout<< forma;
 }
 
 void Enemigo::move(int mX, int mY){ //la idea de eso seria en el behavior decirle directamente que se muevan en el eje x o en el y
-	borrar();
-	x = x+mX;
-	y = y+mY;
-	dibujar();
+	if (act==true){
+		borrar();
+		x = x+mX;
+		y = y+mY;
+		dibujar();
+	}
 }
+//esto y que este en publico es para que el disparo corrobore si esta colisionando con un Enemigo en la posicion en la que esta y llame a esto y tmb se elimine a si mismo
+void Enemigo::dead(){ 		
+	borrar();
+	act = false;
+}
+	
+
 //Clase jugador (saque los puntos ed jugador, no se si contarlos aparte o no lo vere dsp)		
 class jugador{	
 private:
@@ -176,8 +189,11 @@ private:
 public:
 	shoot( int shX, int shY, int shDmove);
 	
-	void shMove (int moveY);
+	bool activo(){return act;}
 	
+	void shMove (int moveY);	
+	void spawn (int shX, int shY);
+	void collision(Enemigo*enemigos[],int n);
 };
 
 shoot::shoot(int shX, int shY, int shDmove){
@@ -196,15 +212,38 @@ void shoot::dibujar(){
 	cout<< forma;
 }
 void shoot::shMove(int moveY){
-	borrar();
-	y = y+moveY;
-	dibujar();
-	shCountR = clock();
-	if(y == bordeSup){
+	if (act ==true){
 		borrar();
-		shJ=false;
+		y = y+moveY;
+		dibujar();
+		shCountR = clock();
 	}
-	
+	if(y <= bordeSup){
+		borrar();
+		act = false;
+	}
+}
+void shoot::spawn(int shX,int shY){
+	borrar();
+	x = shX;
+	y = shY;
+	dibujar();
+	act=true;
+	if(y <= bordeSup){
+		borrar();
+		act = false;
+	}
+}
+void shoot::collision(Enemigo*enemigos[],int n){
+	if(act==true){
+		for (int i=0; i<n; i++){
+			if (enemigos[i]->act==true && enemigos[i]->getX()==x && enemigos[i]->getY()==y){
+				enemigos[i]->dead();
+				borrar();
+				act=false;
+			}
+		}
+	}
 }
 
 //Void general, lista de enemigos y n es el numero de enemigos
@@ -231,13 +270,16 @@ void behavior(Enemigo*enemigos[],int n){
 		
 		//detectar la coordenada x de el enemigo mas a la izq y a la derecha.
 		for (int i=0; i<n; i++){
-			int x= enemigos[i]-> getX();	
-			if (x < enemigoL){
-				enemigoL=x;
+			if(enemigos[i]->act==true){
+				int x= enemigos[i]-> getX();
+				if (x < enemigoL){
+					enemigoL=x;
+				}
+				if (x > enemigoR){
+					enemigoR=x;
+				}
 			}
-			if (x > enemigoR){
-				enemigoR=x;
-			}
+			
 		}
 		
 		return;
@@ -250,12 +292,14 @@ void behavior(Enemigo*enemigos[],int n){
 		}
 		//detectar la coordenada x de el enemigo mas a la izq y a la derecha.
 		for (int i=0; i<n; i++){
-			int x= enemigos[i]-> getX();	
-			if (x < enemigoL){
-				enemigoL=x;
-			}
-			if (x > enemigoR){
-				enemigoR=x;
+			if(enemigos[i]->act==true){
+				int x= enemigos[i]-> getX();
+				if (x < enemigoL){
+					enemigoL=x;
+				}
+				if (x > enemigoR){
+					enemigoR=x;
+				}
 			}
 		}
 	}
@@ -265,12 +309,14 @@ void behavior(Enemigo*enemigos[],int n){
 		}
 		//detectar la coordenada x de el enemigo mas a la izq y a la derecha.
 		for (int i=0; i<n; i++){
-			int x= enemigos[i]-> getX();	
-			if (x < enemigoL){
-				enemigoL=x;
-			}
-			if (x > enemigoR){
-				enemigoR=x;
+			if(enemigos[i]->act==true){
+				int x= enemigos[i]-> getX();
+				if (x < enemigoL){
+					enemigoL=x;
+				}
+				if (x > enemigoR){
+					enemigoR=x;
+				}
 			}
 		}
 	}
@@ -349,15 +395,15 @@ int main (int argc, char *argv[]) {
 	jugador j1(26,bordeInf);
 	j1.jMove(0);
 	
-	shoot sh1(j1.getX(),bordeInf-1,0);
+	shoot sh1(1,1,0);
 	
 	rit = CLOCKS_PER_SEC/1; //uno es con lo que vario la velocidad podria poner una variable para cambiarlo pero por ahora va a quedar asi
 	countR = clock();
 	
-	jRit = CLOCKS_PER_SEC/3;
+	jRit = CLOCKS_PER_SEC/5;
 	jCountR = clock();	
 	//dsp capaz cambio esto para el disparo
-	shRit = CLOCKS_PER_SEC/5;
+	shRit = CLOCKS_PER_SEC/10;
 	shCountR = clock();
 	while(true){
 		
@@ -366,7 +412,7 @@ int main (int argc, char *argv[]) {
 			countR = clock();
 		}
 		
-		if(knhit()){
+		if(kbhit()){
 		    ad = _getch();
 		}
 		
@@ -379,21 +425,23 @@ int main (int argc, char *argv[]) {
 			}
 		}
 		
-		if(knhit()){
+		if(kbhit()){
 			shKey=_getch();
 		}
 		
 		if(shRit+shCountR<clock()){
-			if (shKey == ' ' && shJ == false){
-				shoot sh1(j1.getX(),bordeInf-1,0);
-				sh1.shMove(-1);
-				shJ=true;
-			}
-			else if (shJ==true){
+			if (shKey == ' ' && sh1.activo()==false){
+				sh1.spawn (j1.getX(),bordeInf-1);
 				sh1.shMove(-1);
 			}
-			
+			else if (sh1.activo()==true){
+				sh1.shMove(-1);
+				sh1.collision(enemigos,24);
+			}
 		}
+		
+		ad='p';
+		shKey='p';
 	}
 	
 	return 0;
