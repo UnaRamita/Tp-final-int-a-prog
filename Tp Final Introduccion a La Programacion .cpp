@@ -11,6 +11,8 @@ const int bordeIzq = 3;
 const int bordeDer = 54;
 const int bordeInf = 29;
 
+int eShCount=0;
+
 clock_t rit;
 clock_t countR;
 
@@ -19,6 +21,9 @@ clock_t jCountR;
 
 clock_t shRit;
 clock_t shCountR;
+
+clock_t shErit;
+clock_t shEcountR;
 
 char ad;
 char shKey;
@@ -52,6 +57,7 @@ public:
 	void dead ();
 	
 	bool act = true;
+	bool actShooter=false;
 	
 	int points;
 	int getX(){return x;}
@@ -90,6 +96,7 @@ Enemigo::Enemigo(int cX,int cY){
 EnemigoH::EnemigoH(int x,int y) : Enemigo(x,y) {
 	forma = 'H';
 	color = 5;
+	actShooter=true;
 }
 
 EnemigoM::EnemigoM(int x,int y) : Enemigo(x,y) {
@@ -193,7 +200,7 @@ public:
 	
 	void shMove (int moveY);	
 	void spawn (int shX, int shY);
-	void collision(Enemigo*enemigos[],int n);
+	void collision(Enemigo*enemigos[],int n,jugador j1);
 };
 
 shoot::shoot(int shX, int shY, int shDmove){
@@ -212,13 +219,16 @@ void shoot::dibujar(){
 	cout<< forma;
 }
 void shoot::shMove(int moveY){
-	if (act ==true){
+	if (act == true){
 		borrar();
 		y = y+moveY;
 		dibujar();
-		shCountR = clock();
 	}
 	if(y <= bordeSup){
+		borrar();
+		act = false;
+	}
+	if(y >= bordeInf){
 		borrar();
 		act = false;
 	}
@@ -234,7 +244,7 @@ void shoot::spawn(int shX,int shY){
 		act = false;
 	}
 }
-void shoot::collision(Enemigo*enemigos[],int n){
+void shoot::collision(Enemigo*enemigos[],int n, jugador j1){
 	if(act==true){
 		for (int i=0; i<n; i++){
 			if (enemigos[i]->act==true && enemigos[i]->getX()==x && enemigos[i]->getY()==y){
@@ -243,11 +253,37 @@ void shoot::collision(Enemigo*enemigos[],int n){
 				act=false;
 			}
 		}
+		if(j1.getX()==x && y== bordeInf){
+			j1.setJhp(j1.getJhp()-1);
+			borrar();
+			act=false;
+		}
 	}
 }
-
+  Enemigo*SelectShooter(Enemigo*enemigos[]){
+	//la idea para los disparos va a ser recorrer la fila de enfrente y si no estan muertos agregarlos a los que pueden disparar, en caso contrario 
+	//ir al enemigo anterior en la columna que por como los organize esta 8 puestos atras en la lista.
+	Enemigo*pShooter[8];
+	int Count=0;
+	
+	for (int i=16; i<24;i++){
+		Enemigo* tem = enemigos[i];
+		if(tem->act==false){
+			tem=enemigos[i-8];
+			if (tem->act==false){
+				tem=enemigos[i-16];
+			}
+		}
+		if(tem->act==true){
+			pShooter[Count]=tem;
+			Count++;
+		}
+	}
+	int pSh = rand()%Count;
+	return pShooter[pSh];
+}
 //Void general, lista de enemigos y n es el numero de enemigos
-void behavior(Enemigo*enemigos[],int n){
+void behavior(Enemigo*enemigos[],int n, shoot sh2){
 	
 	static int moveX= 1;
 	
@@ -328,9 +364,14 @@ void behavior(Enemigo*enemigos[],int n){
 		edgeD=true;
 	}
 	else {edgeD=false;}
-
 	if (edgeD==true){
 		down=true;
+	}
+	eShCount++;
+	if (eShCount>=2){
+		Enemigo*shooter = SelectShooter(enemigos);
+		sh2.spawn(shooter->getX(),shooter->getY()+1);
+		eShCount=0;
 	}
 }
 
@@ -396,6 +437,7 @@ int main (int argc, char *argv[]) {
 	j1.jMove(0);
 	
 	shoot sh1(1,1,0);
+	shoot sh2(1,1,0);
 	
 	rit = CLOCKS_PER_SEC/1; //uno es con lo que vario la velocidad podria poner una variable para cambiarlo pero por ahora va a quedar asi
 	countR = clock();
@@ -405,10 +447,14 @@ int main (int argc, char *argv[]) {
 	//dsp capaz cambio esto para el disparo
 	shRit = CLOCKS_PER_SEC/10;
 	shCountR = clock();
+	
+	shErit = CLOCKS_PER_SEC/10;
+	shEcountR = clock();
+
 	while(true){
 		
 		if (rit+countR<clock()){
-			behavior(enemigos,24);
+			behavior(enemigos,24,sh2);
 			countR = clock();
 		}
 		
@@ -433,13 +479,22 @@ int main (int argc, char *argv[]) {
 			if (shKey == ' ' && sh1.activo()==false){
 				sh1.spawn (j1.getX(),bordeInf-1);
 				sh1.shMove(-1);
+				shCountR = clock();
 			}
 			else if (sh1.activo()==true){
 				sh1.shMove(-1);
-				sh1.collision(enemigos,24);
+				sh1.collision(enemigos,24,j1);
+				shCountR = clock();
 			}
 		}
 		
+		if(shErit+shEcountR<clock()){
+			if(sh2.activo()==true){
+				sh2.shMove(1);
+				sh2.collision(enemigos,24,j1);
+				shEcountR = clock();
+			}
+		}
 		ad='p';
 		shKey='p';
 	}
