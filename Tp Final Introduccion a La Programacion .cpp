@@ -251,6 +251,7 @@
 					borrar();
 					act=false;
 					j1.setPoints(enemigos[i]->points);
+					textcolor(2);
 					gotoxy(12,1);
 					cout<<"Points "<<j1.getPoints();
 				}
@@ -259,6 +260,7 @@
 				j1.setJhp(-1);
 				borrar();
 				act=false;
+				textcolor(2);
 				gotoxy(4,1);
 				cout<<"Hp "<<j1.getJhp();
 			}
@@ -378,6 +380,44 @@
 			eShCount=0;
 		}
 	}
+    //Menu de incio
+	void Menu(){
+		textcolor(WHITE);
+		gotoxy(15, 3);
+		cout << "TRABAJO PRACTICO - INTRODUCCION A LA PROGRAMACION";
+		
+		gotoxy(15, 5);
+		cout << "Alumno: Zelmar Amaru Rodriguez Droz";
+		
+		textcolor(LIGHTRED);
+		gotoxy(20, 8);
+		cout << "=== SPACE INVADERS ===";
+		
+		textcolor(LIGHTGREEN);
+		gotoxy(10, 12);
+		cout << "Controles:";
+		gotoxy(12, 13);
+		cout << "a -> Mover a la izquierda";
+		gotoxy(12, 14);
+		cout << "d -> Mover a la derecha";
+		gotoxy(12, 15);
+		cout << "ESPACIO -> Disparar";
+		
+		gotoxy(10, 17);
+		cout << "Objetivo:";
+		gotoxy(12, 18);
+		cout << "Sobrevive, destruye a los enemigos y evita que lleguen a tu linea.";
+		
+		textcolor(YELLOW);
+		gotoxy(15, 22);
+		cout << "Presiona cualquier tecla para comenzar...";
+		
+		// Espera una tecla
+		getch();
+		clrscr(); // limpia antes de empezar el juego
+	}
+	
+	//dibuja los bordes del mapa 
 	void BordesMapa(){
 		for(int x = bordeIzq; x <= bordeDer; x++){
 			gotoxy(x,bordeSup -1);
@@ -397,7 +437,50 @@
 		}
 	}
 
+	void Victoria(jugador& j1) {
+		clrscr(); // limpia la pantalla
+		textcolor(LIGHTGREEN);
+		
+		gotoxy(20, 8);
+		cout << "===== VICTORIA =====";
+		
+		textcolor(WHITE);
+		gotoxy(18, 12);
+		cout << "Has derrotado a todos los invasores!";
+		
+		gotoxy(18, 14);
+		cout << "Puntuacion final: " << j1.getPoints();
+		
+		textcolor(YELLOW);
+		gotoxy(15, 18);
+		cout << "Gracias por jugar Space Invaders!";
+		
+		getch(); // espera tecla antes de salir
+	}
+	
+	void Derrota(jugador& j1) {
+		clrscr(); // limpia la pantalla
+		textcolor(RED);
+		
+		gotoxy(20, 8);
+		cout << "===== GAME OVER =====";
+		
+		textcolor(WHITE);
+		gotoxy(18, 12);
+		cout << "Has sido derrotado...";
+		
+		gotoxy(18, 14);
+		cout << "Puntuacion final: " << j1.getPoints();
+		
+		textcolor(YELLOW);
+		gotoxy(15, 18);
+		cout << "Gracias por jugar Space Invaders!";
+		
+		getch(); // espera tecla antes de salir
+	}
+
 	int main (int argc, char *argv[]) {
+		Menu();
 		BordesMapa();
 		//orden de enemigos W arriba, M medio ,H abajo
 		//x y
@@ -508,10 +591,19 @@
 			}
 			ad='p';
 			shKey='p';
-			for(int i=0; i<24;i++){
-				if (j1.getJhp()<=0 || j1.getPoints()>=4800 || enemigos[i]->getY()==bordeInf){
+			for(int i=0; i<24;i++){//for para pasar por los enemigos
+				if (enemigos[i]->getY()==bordeInf){
+					Derrota(j1);
 					pEnd=true;
 				}
+			}
+			if (j1.getPoints()>=4800){
+				Victoria(j1);
+				pEnd=true;
+			}
+			if (j1.getJhp()<=0){
+				Derrota(j1);
+				pEnd=true;
 			}
 		}
 		
