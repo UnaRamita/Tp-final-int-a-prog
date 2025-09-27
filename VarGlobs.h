@@ -20,8 +20,7 @@ extern clock_t shCountR;
 extern clock_t shErit;
 extern clock_t shEcountR;
 
-extern char ad;
-extern char shKey;
+extern char key;
 
 extern bool pEnd;
 

@@ -14,7 +14,6 @@ clock_t shCountR = clock();
 clock_t shErit = CLOCKS_PER_SEC/10;
 clock_t shEcountR = clock();
 
-char ad;
-char shKey;
+char key;
 
 bool pEnd= false;

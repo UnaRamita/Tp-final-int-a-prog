@@ -224,25 +224,29 @@ void BordesMapa(){
 				behavior(enemigos, 24, sh2);
 				countR = clock();
 			}
-			
-			if (kbhit()) { ad = _getch(); }
-			if (jRit + jCountR < clock()) {
-				if (ad == 'd') j1.jMove(1);
-				if (ad == 'a') j1.jMove(-1);
+			// algunos cambios respecto a como esta organizado la toma de las teclas, la verdad no termino en cambios practicos en lo jugable pero habia que probarlo 
+			if (kbhit()) {
+				key= _getch(); 
+				
+				if (key =='d' && jRit + jCountR < clock()) {
+					j1.jMove(1);
+				}
+				else if (key =='a' && jRit + jCountR < clock()) {
+					
+					j1.jMove(-1);
+				}
+				else if (key ==' ' && jRit + jCountR < clock()) {
+					if(sh1.activo() == false){sh1.spawn(j1.getX(), bordeInf - 1);
+					sh1.shMove(-1);
+					shCountR = clock();
+					}
+				}
 			}
 			
-			if (kbhit()) { shKey = _getch(); }
-			if (shRit + shCountR < clock()) {
-				if (shKey == ' ' && sh1.activo() == false) {
-					sh1.spawn(j1.getX(), bordeInf - 1);
-					sh1.shMove(-1);
-					shCountR = clock();
-				}
-				else if (sh1.activo() == true) {
-					sh1.shMove(-1);
-					sh1.collision(enemigos, 24, j1);
-					shCountR = clock();
-				}
+			if (sh1.activo() == true && shRit+shCountR<clock()) {
+				sh1.shMove(-1);
+				sh1.collision(enemigos, 24, j1);
+				shCountR = clock();
 			}
 			
 			if (shErit + shEcountR < clock()) {
@@ -252,9 +256,6 @@ void BordesMapa(){
 					shEcountR = clock();
 				}
 			}
-			
-			ad = 'p';
-			shKey = 'p';
 			
 			for (int i = 0; i < 24; i++) {
 				if (enemigos[i]->getY() == bordeInf) {
@@ -291,6 +292,12 @@ void Victoria(jugador& j1) {
 	gotoxy(15, 18);
 	cout << "Gracias por jugar Space Invaders!";
 	
+	// esto deberia hacer que pare un segundo antes de tomar tecla
+	clock_t start = clock();
+	while (clock() < start + CLOCKS_PER_SEC) {
+		// bucle vacío
+	}
+	
 	getch();
 }
 void Derrota(jugador& j1) {
@@ -310,6 +317,12 @@ void Derrota(jugador& j1) {
 	textcolor(YELLOW);
 	gotoxy(15, 18);
 	cout << "Gracias por jugar Space Invaders!";
+	
+	// esto deberia hacer que pare un segundo antes de tomar tecla
+	clock_t start = clock();
+	while (clock() < start + CLOCKS_PER_SEC) {
+		// bucle vacío
+	}
 	
 	getch();	
 }
